@@ -1,0 +1,13 @@
+{
+    "name": "leibowitz/wvio",
+    "require": {
+        "silex/silex": "~1.1",
+        "guzzle/guzzle": "~3.7"
+    },
+    "authors": [
+        {
+            "name": "Gianni Moschini",
+            "email": "gianni.moschini@hailocab.com"
+        }
+    ]
+}
