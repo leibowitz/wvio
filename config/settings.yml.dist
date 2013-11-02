@@ -1,3 +1,8 @@
 user: yourusername
-project: yourprojectname
 token: 'yourtoken'
+project: projectkey
+projects: 
+  projectkey:
+    name: yourprojectname
+    url: http://url.of.the.api/with/all/the/path
+    field: json.field.in.response.with.commit.hash
