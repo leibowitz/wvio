@@ -33,28 +33,28 @@ echo sprintf("Date: %s\n", $commit_details['commit']['author']['date']);
 echo sprintf("Message: %s\n", $commit_details['commit']['message']);
 echo sprintf("Url: %s\n", $commit_details['html_url']);
 
+// to store the branches names where the commit was found
+$founds = array();
+
 // Get all branches
 echo "Retrieving branches information\n";
 $branches = $githubclient->api('repo')->branches($config['user'], $project['name']);
 
 echo sprintf("Found %d branches\n", count($branches));
 
-// to store the branches names where the commit was found
-$founds = array();
-
 // Looking into each branches at HEAD
 foreach($branches as $branch) {
     // Check if HEAD is the commit we are looking for
     if( $branch['commit']['sha'] == $commit_version ) {
+        echo sprintf("Found commit at HEAD of branch %s\n", $branch['name']);
         $founds[ $branch['name'] ] = 0;
-        continue;
     }
 
 }
 
 // Looking for closed Pull Requests
 echo "Retrieving closed pull requests\n";
-$pull_requests = $githubclient
+$pullrequests = $githubclient
     ->api('pull_request')
     ->all(
         $config['user'],
@@ -63,17 +63,14 @@ $pull_requests = $githubclient
             'state' => 'closed',
             'base' => 'master'));
 
-// Looking at HEAD of all closed Pull Requests
-foreach($pull_requests as $preq)
-{
-    $branch = $preq['head']['ref'];
-    $sha = $preq['head']['sha'];
-    echo sprintf("Analysing branch %s\n", $branch);
+echo sprintf("Found %d closed pull requests\n", count($pullrequests));
 
-    if( $commit_version == $sha ) {
-        echo sprintf("Found commit at HEAD of branch %s\n", $branch);
-        $founds[ $branch ] = 0;
-        break;
+// Looking at HEAD of all closed Pull Requests
+foreach($pullrequests as $preq)
+{
+    if( $commit_version == $preq['head']['sha'] ) {
+        echo sprintf("Found commit at HEAD of branch %s\n", $preq['head']['ref']);
+        $founds[ $preq['head']['ref'] ] = 0;
     }
 
 }
@@ -81,7 +78,7 @@ foreach($pull_requests as $preq)
 if( count($founds) == 0 ) {
     // Look into each branches latest 30 commits
     foreach($branches as $branch) {
-        echo "Retrieving commits for branch: ".$branch['name']."\n";
+        echo sprintf("Retrieving commits for branch: %s\n", $branch['name']);
         // Get latest 30 commits on this branch
         $commits = $githubclient
             ->api('repo')
@@ -107,13 +104,20 @@ if( count($founds) == 0 ) {
 
 if( count($founds) == 0 ) {
     // Looking at last 30 commits of all closed Pull Requests
-    foreach($pull_requests as $preq)
+    foreach($pullrequests as $preq)
     {
         //echo sprintf("Retrieving branch %s informations\n", $preq['head']['ref']);
         //$branch_info = $githubclient->api('repo')->branches($config['user'], $project['name'], $preq['head']['ref']);
 
-        echo "Retrieving branch commits\n";
-        $commits = $githubclient->api('repo')->commits()->all($config['user'], $project['name'], array('sha' => $preq['head']['sha']));
+        echo sprintf("Retrieving commits for branch: %s\n", $preq['head']['ref']);
+        // Get latest 30 commits on this branch
+        $commits = $githubclient
+            ->api('repo')
+            ->commits()
+            ->all(
+                $config['user'],
+                $project['name'],
+                array('sha' => $preq['head']['sha']));
 
         echo sprintf("Found %d commits\n", count($commits));
 
