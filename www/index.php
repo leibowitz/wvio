@@ -42,29 +42,14 @@ echo sprintf("Found %d branches\n", count($branches));
 // to store the branches names where the commit was found
 $founds = array();
 
-// Looking into each branches
+// Looking into each branches at HEAD
 foreach($branches as $branch) {
     // Check if HEAD is the commit we are looking for
     if( $branch['commit']['sha'] == $commit_version ) {
-        $founds[] = $branch['name'];
-        break;
+        $founds[ $branch['name'] ] = 0;
+        continue;
     }
 
-    echo "Retrieving commits for branch: ".$branch['name']."\n";
-    // Get latest 30 commits on this branch
-    $commits = $githubclient->api('repo')->commits()->all($config['user'], $project['name'], array('sha' => $branch['commit']['sha']) );
-
-    echo sprintf("Found %d commits\n", count($commits));
-
-    // Scan each commit and compare the hash
-    foreach($commits as $commit) {
-        if( $commit_version == $commit['sha'] ) {
-            // We found the commit in this branch
-            echo sprintf("Found commit in branch %s\n", $branch['name']);
-            $founds[] = $branch['name'];
-            break;
-        }
-    }
 }
 
 // Looking for closed Pull Requests
@@ -78,6 +63,7 @@ $pull_requests = $githubclient
             'state' => 'closed',
             'base' => 'master'));
 
+// Looking at HEAD of all closed Pull Requests
 foreach($pull_requests as $preq)
 {
     $branch = $preq['head']['ref'];
@@ -86,30 +72,64 @@ foreach($pull_requests as $preq)
 
     if( $commit_version == $sha ) {
         echo sprintf("Found commit at HEAD of branch %s\n", $branch);
-        $founds[] = $branch;
+        $founds[ $branch ] = 0;
         break;
     }
 
-    //echo "Retrieving branch information\n";
-    //$branch_info = $githubclient->api('repo')->branches($config['user'], $project['name'], $branch);
-
-    /*echo "Retrieving branch commits\n";
-    $commits = $githubclient->api('repo')->commits()->all($config['user'], $project['name'], array('sha' => $sha));
-
-    echo sprintf("Found %d commits\n", count($commits));
-
-    // Scan each commit and compare the hash
-    foreach($commits as $commit) {
-        if( $commit_version == $commit['sha'] ) {
-            // We found the commit in this branch
-            echo sprintf("Found commit in branch %s\n", $branch);
-            $founds[] = $branch;
-            break 2;
-        }
-    }*/
-    //$preq['merge_commit_sha'];
 }
 
-echo sprintf("Commit found in branches: %s\n", implode(', ', $founds));
+if( count($founds) == 0 ) {
+    // Look into each branches latest 30 commits
+    foreach($branches as $branch) {
+        echo "Retrieving commits for branch: ".$branch['name']."\n";
+        // Get latest 30 commits on this branch
+        $commits = $githubclient
+            ->api('repo')
+            ->commits()
+            ->all(
+                $config['user'],
+                $project['name'],
+                array('sha' => $branch['commit']['sha']) );
+
+        echo sprintf("Found %d commits\n", count($commits));
+
+        // Scan each commit and compare the hash
+        foreach($commits as $index => $commit) {
+            if( $commit_version == $commit['sha'] ) {
+                // We found the commit in this branch
+                echo sprintf("Found commit in branch %s\n", $branch['name']);
+                $founds[ $branch['name'] ] = $index;
+                break 2;
+            }
+        }
+    }
+}
+
+if( count($founds) == 0 ) {
+    // Looking at last 30 commits of all closed Pull Requests
+    foreach($pull_requests as $preq)
+    {
+        //echo sprintf("Retrieving branch %s informations\n", $preq['head']['ref']);
+        //$branch_info = $githubclient->api('repo')->branches($config['user'], $project['name'], $preq['head']['ref']);
+
+        echo "Retrieving branch commits\n";
+        $commits = $githubclient->api('repo')->commits()->all($config['user'], $project['name'], array('sha' => $preq['head']['sha']));
+
+        echo sprintf("Found %d commits\n", count($commits));
+
+        // Scan each commit and compare the hash
+        foreach($commits as $index => $commit) {
+            if( $commit_version == $commit['sha'] ) {
+                // We found the commit in this branch
+                echo sprintf("Found commit in branch %s\n", $preq['head']['ref']);
+                $founds[ $preq['head']['ref'] ] = $index;
+                break 2;
+            }
+        }
+        //$preq['merge_commit_sha'];
+    }
+}
+
+echo sprintf("Commit found in branches: %s\n", implode(', ', array_keys($founds)));
 
 
