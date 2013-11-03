@@ -3,137 +3,218 @@
 include __DIR__ . '/../vendor/autoload.php';
 
 use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Guzzle\Http;
 
 // Get config from file
 $config_file = __DIR__ . '/../config/settings.yml';
 $config = Yaml::parse($config_file);
 
-$project = $config['projects'][ $config['project'] ];
+$app = new Silex\Application();
 
-// find commit hash of deployed version
-$httpclient = new Http\Client($project['url']);
-$request = $httpclient->get();
-$resp = $request->send();
-$content = json_decode($resp->getBody(), true);
-$commit_version = $content[ $project['field'] ];
+$app['debug'] = true;
+$app['whatison'] = new WhatIsOn($config);
 
-// Authentification
-$githubclient = new Github\Client();
-$githubclient->authenticate($config['token'], '', Github\Client::AUTH_HTTP_TOKEN);
+$app->match('{project}', function(Request $request) use ($app) {
+    $resp = new Response();
 
-// start to query the github api about the commit
-echo sprintf("Looking for informations about project %s commit %s\n", $project['name'], $commit_version);
-// get info about the commit
-$commit_details = $githubclient->api('repo')->commits()->show($config['user'], $project['name'], $commit_version);
+    $project = $request->get('project');
 
-// display commit info
-echo sprintf("Author: %s\n", $commit_details['commit']['author']['name']);
-echo sprintf("Date: %s\n", $commit_details['commit']['author']['date']);
-echo sprintf("Message: %s\n", $commit_details['commit']['message']);
-echo sprintf("Url: %s\n", $commit_details['html_url']);
+    if( !$app['whatison']->hasProject($project) ) {
+        $resp->setStatusCode(404);
+        $payload = null;
+    } else {
 
-// to store the branches names where the commit was found
-$founds = array();
+        $payload = $app['whatison']->getProjectInfo($project);
 
-// Get all branches
-echo "Retrieving branches information\n";
-$branches = $githubclient->api('repo')->branches($config['user'], $project['name']);
 
-echo sprintf("Found %d branches\n", count($branches));
-
-// Looking into each branches at HEAD
-foreach($branches as $branch) {
-    // Check if HEAD is the commit we are looking for
-    if( $branch['commit']['sha'] == $commit_version ) {
-        echo sprintf("Found commit at HEAD of branch %s\n", $branch['name']);
-        $founds[ $branch['name'] ] = 0;
     }
 
-}
-
-// Looking for closed Pull Requests
-echo "Retrieving closed pull requests\n";
-$pullrequests = $githubclient
-    ->api('pull_request')
-    ->all(
-        $config['user'],
-        $project['name'],
+    $content = json_encode(
         array(
-            'state' => 'closed',
-            'base' => 'master'));
+            'status' => $resp->getStatusCode() != 404,
+            'payload' => $payload
+        ));
 
-echo sprintf("Found %d closed pull requests\n", count($pullrequests));
+    $resp->setContent($content);
 
-// Looking at HEAD of all closed Pull Requests
-foreach($pullrequests as $preq)
+    return $resp;
+})->assert('project', '.*');
+
+$app->run();
+
+class WhatIsOn
 {
-    if( $commit_version == $preq['head']['sha'] ) {
-        echo sprintf("Found commit at HEAD of branch %s\n", $preq['head']['ref']);
-        $founds[ $preq['head']['ref'] ] = 0;
-    }
-
-}
-
-if( count($founds) == 0 ) {
-    // Look into each branches latest 30 commits
-    foreach($branches as $branch) {
-        echo sprintf("Retrieving commits for branch: %s\n", $branch['name']);
-        // Get latest 30 commits on this branch
-        $commits = $githubclient
-            ->api('repo')
-            ->commits()
-            ->all(
-                $config['user'],
-                $project['name'],
-                array('sha' => $branch['commit']['sha']) );
-
-        echo sprintf("Found %d commits\n", count($commits));
-
-        // Scan each commit and compare the hash
-        foreach($commits as $index => $commit) {
-            if( $commit_version == $commit['sha'] ) {
-                // We found the commit in this branch
-                echo sprintf("Found commit in branch %s\n", $branch['name']);
-                $founds[ $branch['name'] ] = $index;
-                break 2;
-            }
-        }
-    }
-}
-
-if( count($founds) == 0 ) {
-    // Looking at last 30 commits of all closed Pull Requests
-    foreach($pullrequests as $preq)
+    public function __construct($config)
     {
-        //echo sprintf("Retrieving branch %s informations\n", $preq['head']['ref']);
-        //$branch_info = $githubclient->api('repo')->branches($config['user'], $project['name'], $preq['head']['ref']);
+        $this->config = $config;
+        $this->founds = array();
+        $this->initGithubClient();
+    }
 
-        echo sprintf("Retrieving commits for branch: %s\n", $preq['head']['ref']);
-        // Get latest 30 commits on this branch
-        $commits = $githubclient
+    function initGithubClient()
+    {
+        // Authentification
+        $this->githubclient = new Github\Client();
+        $this->githubclient->authenticate($this->config['token'], '', Github\Client::AUTH_HTTP_TOKEN);
+
+    }
+
+    function getGithubClient()
+    {
+        return $this->githubclient;
+    }
+
+    function hasProject($key)
+    {
+        return array_key_exists($key, $this->config['projects']);
+    }
+    function getProjectConfig($key = null)
+    {
+        return $this->config['projects'][ $key ?: $this->project_key ];
+    }
+    function setProjectKey($key)
+    {
+        $this->project_key = $key;
+    }
+
+    function getProjectCommit($project_key = null)
+    {
+        $project_data = $this->getProjectConfig($project_key);
+        $url = $project_data['url'];
+        $field = $project_data['field'];
+        // find commit hash of deployed version
+        $httpclient = new Http\Client($url);
+        $request = $httpclient->get();
+        $resp = $request->send();
+        $content = json_decode($resp->getBody(), true);
+        return $content[ $field ];
+    }
+
+    function getCommitDetails($commit, $project_key = null)
+    {
+        // start to query the github api about the commit
+        //echo sprintf("Looking for informations about project %s commit %s\n", $project['name'], $commit_version);
+        // get info about the commit
+        $project = $this->getProjectConfig($project_key);
+        $commit_details = $this->getGithubClient()->api('repo')->commits()->show($this->config['user'], $project['name'], $commit);
+
+        return array(
+            'author' => $commit_details['commit']['author']['name'],
+            'date' => $commit_details['commit']['author']['date'],
+            'message' => $commit_details['commit']['message'],
+            'url' => $commit_details['html_url']
+        );
+    }
+
+    function getBranches($project_key = null)
+    {
+        $project = $this->getProjectConfig($project_key);
+        return $this->getGithubClient()->api('repo')->branches($this->config['user'], $project['name']);
+    }
+
+    function addFoundBranch($branch, $index = 0)
+    {
+        // store the branches names where the commit was found
+        $this->founds[ $branch ] = $index;
+    }
+
+    function getFoundBranches()
+    {
+        return array_keys($this->founds);
+    }
+
+    function countFoundBranches()
+    {
+        return count($this->founds);
+    }
+
+    function getPullRequests($branch = 'master', $state = 'closed', $project_key = null)
+    {
+        $project = $this->getProjectConfig($project_key);
+        return $this->getGithubClient()
+            ->api('pull_request')
+            ->all(
+                $this->config['user'],
+                $project['name'],
+                array(
+                    'state' => $state,
+                    'base' => $branch,
+                    // Get only latest 3 PR as otherwise github api
+                    // tends to timeout
+                    'per_page' => 3,
+                ));
+    }
+
+    function getAllBranchesSha($project_key = null)
+    {
+        $data = array();
+
+        $branches = $this->getBranches($project_key);
+        foreach($branches as $branch) {
+            $data[ $branch['name'] ] = $branch['commit']['sha'];
+        }
+
+        $pullrequests = $this->getPullRequests('master', 'closed', $project_key);
+        foreach($pullrequests as $preq)
+        {
+            $data[ $preq['head']['ref'] ] = $preq['head']['sha'];
+        }
+
+        return $data;
+    }
+
+    public function getBranchesForCommit($commit, $project_key = null)
+    {
+        $branches = $this->getAllBranchesSha($project_key);
+        foreach($branches as $branch => $sha) {
+            if( $sha == $commit ) {
+                $this->addFoundBranch( $branch );
+            }
+        }
+
+        if( $this->countFoundBranches() == 0 ) {
+            $this->searchBranches($branches, $commit, $project_key);
+        }
+
+        return $this->getFoundBranches();
+    }
+
+    public function getBranchCommits($sha, $project_key = null)
+    {
+        $project = $this->getProjectConfig($project_key);
+        return $this->getGithubClient()
             ->api('repo')
             ->commits()
             ->all(
-                $config['user'],
+                $this->config['user'],
                 $project['name'],
-                array('sha' => $preq['head']['sha']));
+                array('sha' => $sha) );
+    }
 
-        echo sprintf("Found %d commits\n", count($commits));
+    public function searchBranches($branches, $search_commit, $project)
+    {
+        foreach($branches as $branch => $sha) {
+            $commits = $this->getBranchCommits($sha, $project);
 
-        // Scan each commit and compare the hash
-        foreach($commits as $index => $commit) {
-            if( $commit_version == $commit['sha'] ) {
-                // We found the commit in this branch
-                echo sprintf("Found commit in branch %s\n", $preq['head']['ref']);
-                $founds[ $preq['head']['ref'] ] = $index;
-                break 2;
+            foreach($commits as $index => $commit) {
+                if( $search_commit == $commit['sha'] ) {
+                    // We found the commit in this branch
+                    //echo sprintf("Found commit in branch %s\n", $branch);
+                    $this->addFoundBranch( $branch, $index );
+                    break 2;
+                }
             }
         }
-        //$preq['merge_commit_sha'];
+
+    }
+
+    public function getProjectInfo($project)
+    {
+        $commit = $this->getProjectCommit($project);
+        $details = $this->getCommitDetails($commit, $project);
+        $details['branches'] = $this->getBranchesForCommit($commit, $project);
+        return $details;
     }
 }
-
-echo sprintf("Commit found in branches: %s\n", implode(', ', array_keys($founds)));
-
-
