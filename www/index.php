@@ -165,16 +165,36 @@ class WhatIsOn
         return $data;
     }
 
-    public function getBranchesForCommit($commit, $project_key = null)
+    public function compareSha($branches, $commit)
     {
-        $branches = $this->getAllBranchesSha($project_key);
         foreach($branches as $branch => $sha) {
             if( $sha == $commit ) {
                 $this->addFoundBranch( $branch );
             }
         }
+    }
+
+    public function getBranchesForCommit($commit, $project_key = null)
+    {
+        $branches = $this->getAllBranchesSha($project_key);
+
+        // Don't check master just yet
+        $master_branch = array('master' => $branches['master']);
+        unset($branches['master']);
+
+        // Look if we can find the commit at the top of a branch
+        $this->compareSha($branches, $commit);
+
+        // Compare with master
+        $this->compareSha($master_branch, $commit);
 
         if( $this->countFoundBranches() == 0 ) {
+            // Search in previous commits in master
+            $this->searchBranches($master_branch, $commit, $project_key);
+        }
+
+        if( $this->countFoundBranches() == 0 ) {
+            // Search in previous commits in all other branches
             $this->searchBranches($branches, $commit, $project_key);
         }
 
