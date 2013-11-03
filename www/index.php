@@ -31,6 +31,7 @@ $commit_details = $githubclient->api('repo')->commits()->show($config['user'], $
 echo sprintf("Author: %s\n", $commit_details['commit']['author']['name']);
 echo sprintf("Date: %s\n", $commit_details['commit']['author']['date']);
 echo sprintf("Message: %s\n", $commit_details['commit']['message']);
+echo sprintf("Url: %s\n", $commit_details['html_url']);
 
 // Get all branches
 echo "Retrieving branches information\n";
@@ -43,8 +44,13 @@ $founds = array();
 
 // Looking into each branches
 foreach($branches as $branch) {
-    echo "Retrieving commits for branch: ".$branch['name']."\n";
+    // Check if HEAD is the commit we are looking for
+    if( $branch['commit']['sha'] == $commit_version ) {
+        $founds[] = $branch['name'];
+        break;
+    }
 
+    echo "Retrieving commits for branch: ".$branch['name']."\n";
     // Get latest 30 commits on this branch
     $commits = $githubclient->api('repo')->commits()->all($config['user'], $project['name'], array('sha' => $branch['commit']['sha']) );
 
