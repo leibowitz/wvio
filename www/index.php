@@ -67,4 +67,49 @@ foreach($branches as $branch) {
     }
 }
 
+// Looking for closed Pull Requests
+echo "Retrieving closed pull requests\n";
+$pull_requests = $githubclient
+    ->api('pull_request')
+    ->all(
+        $config['user'],
+        $project['name'],
+        array(
+            'state' => 'closed',
+            'base' => 'master'));
+
+foreach($pull_requests as $preq)
+{
+    $branch = $preq['head']['ref'];
+    $sha = $preq['head']['sha'];
+    echo sprintf("Analysing branch %s\n", $branch);
+
+    if( $commit_version == $sha ) {
+        echo sprintf("Found commit at HEAD of branch %s\n", $branch);
+        $founds[] = $branch;
+        break;
+    }
+
+    //echo "Retrieving branch information\n";
+    //$branch_info = $githubclient->api('repo')->branches($config['user'], $project['name'], $branch);
+
+    /*echo "Retrieving branch commits\n";
+    $commits = $githubclient->api('repo')->commits()->all($config['user'], $project['name'], array('sha' => $sha));
+
+    echo sprintf("Found %d commits\n", count($commits));
+
+    // Scan each commit and compare the hash
+    foreach($commits as $commit) {
+        if( $commit_version == $commit['sha'] ) {
+            // We found the commit in this branch
+            echo sprintf("Found commit in branch %s\n", $branch);
+            $founds[] = $branch;
+            break 2;
+        }
+    }*/
+    //$preq['merge_commit_sha'];
+}
+
 echo sprintf("Commit found in branches: %s\n", implode(', ', $founds));
+
+
