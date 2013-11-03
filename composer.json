@@ -1,9 +1,15 @@
 {
     "name": "leibowitz/wvio",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/leibowitz/php-github-api"
+        }
+    ],
     "require": {
         "silex/silex": "~1.1",
         "guzzle/guzzle": "~3.7",
-        "knplabs/github-api": "1.1.5",
+        "knplabs/github-api": "dev-modify_pull_request_params",
         "symfony/yaml": "2.3.5"
     },
     "authors": [
