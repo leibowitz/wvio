@@ -7,8 +7,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Leibowitz\Github\Utils\ProjectInfo;
 
+$environment = trim(file_get_contents( __DIR__ . '/../config/environment.txt' ));
+
 // Get config from file
-$config_file = __DIR__ . '/../config/settings.yml';
+$config_file = __DIR__ . '/../config/'.$environment.'/settings.yml';
 $config = Yaml::parse($config_file);
 
 $app = new Silex\Application();
