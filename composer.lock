@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "6170ac7833945f7f4ce1ef70c9ac0cab",
+    "hash": "cdad472222f73ff2903098fc651a8ce4",
     "packages": [
         {
             "name": "guzzle/guzzle",
@@ -204,6 +204,42 @@
                 "http client"
             ],
             "time": "2013-05-19 03:41:15"
+        },
+        {
+            "name": "leibowitz/github-utils",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/leibowitz/php-github-utils.git",
+                "reference": "ee445ff9e1b008dafa3e9f4f46f815faa2565656"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/leibowitz/php-github-utils/zipball/ee445ff9e1b008dafa3e9f4f46f815faa2565656",
+                "reference": "ee445ff9e1b008dafa3e9f4f46f815faa2565656",
+                "shasum": ""
+            },
+            "require": {
+                "guzzle/guzzle": "~3.7",
+                "knplabs/github-api": "dev-modify_pull_request_params"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Leibowitz\\Github\\Utils\\": "src/"
+                }
+            },
+            "authors": [
+                {
+                    "name": "Gianni Moschini",
+                    "email": "gianni.moschini+composer@hailocab.com"
+                }
+            ],
+            "support": {
+                "source": "https://github.com/leibowitz/php-github-utils/tree/master",
+                "issues": "https://github.com/leibowitz/php-github-utils/issues"
+            },
+            "time": "2013-11-04 15:06:52"
         },
         {
             "name": "pimple/pimple",
@@ -718,7 +754,8 @@
     ],
     "minimum-stability": "stable",
     "stability-flags": {
-        "knplabs/github-api": 20
+        "knplabs/github-api": 20,
+        "leibowitz/github-utils": 20
     },
     "platform": [
 
