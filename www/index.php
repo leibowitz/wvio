@@ -8,16 +8,13 @@ use Symfony\Component\HttpFoundation\Response;
 use Guzzle\Http;
 use Leibowitz\Github\Utils\ProjectInfo;
 
-$environment = trim(file_get_contents( __DIR__ . '/../config/environment.txt' ));
-
-// Get config from file
-$config_file = __DIR__ . '/../config/'.$environment.'/settings.yml';
-$config = Yaml::parse($config_file);
-
 $app = new Silex\Application();
 
 $app['debug'] = true;
-$app['info'] = new ProjectInfo($config);
+
+$app->register(new Silex\Provider\TwigServiceProvider(), array(
+    'twig.path' => __DIR__.'/../views',
+));
 
 
 function getProjectStatusInfo($url)
@@ -31,31 +28,77 @@ function getProjectStatusInfo($url)
     return json_decode($resp->getBody(), true);
 }
 
-function getProjectDetails($app, $project)
+function getProjectDetails($info, $project)
 {
-    $project_data = $app['info']->getProjectConfig($project);
+    $project_data = $info->getProjectConfig($project);
 
     $status = getProjectStatusInfo($project_data['url']);
 
-    $commit = $status[ $project_data['field'] ];
+    $commit = $status['commit'];
 
-    $details = $app['info']->getCommitDetails($commit, $project);
+    $details = $info->getCommitDetails($commit, $project);
+    $details['version'] = $status['version'];
 
-    $details['branches'] = $app['info']->getBranchesForCommit($commit, $project);
+    $details['branches'] = $info->getBranchesForCommit($commit, $project);
 
     return $details;
 }
 
-$app->match('{project}', function(Request $request) use ($app) {
+$app->get('status/{environment}/{project}', function(Request $request) use ($app) {
+    $environment = $request->get('environment');
+    $project = $request->get('project');
+
+    // Get config from file
+    $config_file = __DIR__ . '/../config/'.$environment.'/settings.yml';
+    $config = Yaml::parse($config_file);
+
+    /*if( $project ) {
+        $project_data = $config['projects'][ $project ];
+
+        $url = 'http://wvio.dev/'.$environment.'/'.$project_data['name'];
+
+        $httpclient = new Http\Client($url);
+
+        $request = $httpclient->get();
+        $info = $request->send();
+        $content = json_decode((string)$info->getBody(), true);
+
+        //$results[ $project_data['name'] ] = $content['payload'];
+
+        $info = $content['payload'];
+    } else {
+        $info = null;
+    }*/
+
+    return $app['twig']->render('status.twig',
+        array(
+            //'info' => $info,
+            'projects' => $config['projects']
+        )
+    );
+})
+    ->assert('project', '.*')
+    ->assert('environment', 'boxen|staging|production');
+
+$app->match('{environment}/{project}', function(Request $request) use ($app) {
+    //$environment = trim(file_get_contents( __DIR__ . '/../config/environment.txt' ));
+    $environment = $request->get('environment');
+
+    // Get config from file
+    $config_file = __DIR__ . '/../config/'.$environment.'/settings.yml';
+    $config = Yaml::parse($config_file);
+
+    $info = new ProjectInfo($config);
+
     $resp = new Response();
 
     $project = $request->get('project');
 
-    if( !$app['info']->hasProject($project) ) {
+    if( !$info->hasProject($project) ) {
         $resp->setStatusCode(404);
         $payload = null;
     } else {
-        $payload = getProjectDetails($app, $project);
+        $payload = getProjectDetails($info, $project);
     }
 
     $content = json_encode(
@@ -67,7 +110,9 @@ $app->match('{project}', function(Request $request) use ($app) {
     $resp->setContent($content);
 
     return $resp;
-})->assert('project', '.*');
+})
+    ->assert('project', '.*')
+    ->assert('environment', 'boxen|staging|production');
 
 $app->run();
 

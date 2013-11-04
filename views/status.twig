@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en-US">
+    <head>
+        <title>What the Fuck is on Staging</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="stylesheet" type="text/css" media="screen" href="/css/style.css" />
+    </head>
+<body>
+
+<table class="pure-table pure-table-bordered pure-table-striped">
+  <thead>
+    <tr>
+      <th>
+        Project
+      </th>
+      <th>
+        Author
+      </th>
+      <th>
+        Version
+      </th>
+      <th>
+        Message
+      </th>
+      <th>
+        Date
+      </th>
+      <th>
+        Branch
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for key, project in projects %}
+    <tr>
+    <td>
+    {{ project.name }}
+    </td>
+    <td>
+      <span id="project-{{ key }}-author"></span>
+    </td>
+    <td>
+      <span id="project-{{ key }}-version"></span>
+    </td>
+    <td>
+      <span id="project-{{ key }}-message"></span>
+    </td>
+    <td>
+      <span id="project-{{ key }}-date"></span>
+    </td>
+    <td>
+      <span id="project-{{ key }}-branches"></span>
+    </td>
+    </tr>
+{% endfor %}
+  </tbody>
+</table>
+
+<script type="text/javascript">
+  var projects = {{ projects|json_encode|raw }};
+</script>
+<script type="text/javascript" src="/js/jquery.js"></script>
+<script type="text/javascript">
+function getResponse(project){
+  return function(jqXHR, textStatus){
+    var $elem;
+
+    for(key in jqXHR.responseJSON['payload'])
+    {
+      $elem = $('#project-'+project+'-'+key);
+      if( $elem ) {
+        $elem.text( jqXHR.responseJSON['payload'][key] );
+      }
+    }
+  }
+}
+
+for(project in projects)
+{
+  var url = 'http://wvio.dev/staging/' + projects[project]['name'];
+    $.ajax({
+          url: url,
+          dataType: 'json',
+          complete: getResponse(project)
+      });
+}
+</script>
+
+</body>
+</html>
