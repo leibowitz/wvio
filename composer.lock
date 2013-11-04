@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "cdad472222f73ff2903098fc651a8ce4",
+    "hash": "21702a23946d47275fa9706a40adc47f",
     "packages": [
         {
             "name": "guzzle/guzzle",
@@ -211,16 +211,15 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/leibowitz/php-github-utils.git",
-                "reference": "ee445ff9e1b008dafa3e9f4f46f815faa2565656"
+                "reference": "4972d2db37795c0e6c751139003bff965784b7c2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/leibowitz/php-github-utils/zipball/ee445ff9e1b008dafa3e9f4f46f815faa2565656",
-                "reference": "ee445ff9e1b008dafa3e9f4f46f815faa2565656",
+                "url": "https://api.github.com/repos/leibowitz/php-github-utils/zipball/4972d2db37795c0e6c751139003bff965784b7c2",
+                "reference": "4972d2db37795c0e6c751139003bff965784b7c2",
                 "shasum": ""
             },
             "require": {
-                "guzzle/guzzle": "~3.7",
                 "knplabs/github-api": "dev-modify_pull_request_params"
             },
             "type": "library",
@@ -239,7 +238,7 @@
                 "source": "https://github.com/leibowitz/php-github-utils/tree/master",
                 "issues": "https://github.com/leibowitz/php-github-utils/issues"
             },
-            "time": "2013-11-04 15:06:52"
+            "time": "2013-11-04 15:47:37"
         },
         {
             "name": "pimple/pimple",
