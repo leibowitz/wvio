@@ -34,7 +34,7 @@
   {% for key, project in projects %}
     <tr>
     <td>
-    {{ key }}
+      <a href="https://github.com/hailocab/{{ project['name'] }}">{{ key }}</a>
     </td>
     <td>
       <span id="project-{{ key }}-author"></span>
@@ -46,7 +46,7 @@
       <span id="project-{{ key }}-message"></span>
     </td>
     <td>
-      <span id="project-{{ key }}-date"></span>
+      <span id="project-{{ key }}-deployed_at"></span>
     </td>
     <td>
       <span id="project-{{ key }}-branches"></span>
