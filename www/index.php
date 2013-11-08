@@ -46,16 +46,12 @@ function getProjectDetails($info, $project)
 
     $details = $info->getCommitDetails($commit, $project);
 
-    if( array_key_exists('version', $project_data) ) {
-        $details['version'] = getResult(
-            $statusInfo->getPath( $project_data['version'] )
-        );
-    }
-
-    if( array_key_exists('time', $project_data) ) {
-        $details['time'] = getResult(
-            $statusInfo->getPath( $project_data['time'] )
-        );
+    if( array_key_exists('fields', $project_data) ) {
+        foreach($project_data['fields'] as $field => $path) {
+            $details[ $field ] = getResult(
+                $statusInfo->getPath( $path )
+            );
+        }
     }
 
     $details['branches'] = $info->getBranchesForCommit($commit, $project);
