@@ -60,12 +60,17 @@ function getProjectDetails($info, $project)
 }
 
 $app->get('status/{environment}/{project}', function(Request $request) use ($app) {
-    $environment = $request->get('environment');
     $project = $request->get('project');
 
-    // Get config from file
-    $config_file = __DIR__ . '/../config/'.$environment.'/settings.yml';
+    $environment = $request->get('environment');
+
+    // global settings
+    $config_file = __DIR__ . '/../config/settings.yml';
     $config = Yaml::parse($config_file);
+
+    // Get environment config
+    $config_file = __DIR__ . '/../config/'.$environment.'/settings.yml';
+    $config = array_replace_recursive($config, Yaml::parse($config_file));
 
     /*if( $project ) {
         $project_data = $config['projects'][ $project ];
