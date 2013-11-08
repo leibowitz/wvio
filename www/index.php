@@ -7,6 +7,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Guzzle\Http;
 use Leibowitz\Github\Utils\ProjectInfo;
+use Leibowitz\Utils\Json\JsonPath;
 
 $app = new Silex\Application();
 
@@ -28,16 +29,24 @@ function getProjectStatusInfo($url)
     return json_decode($resp->getBody(), true);
 }
 
+function getResult($resp)
+{
+    return $resp && is_array($resp) ? array_shift($resp) : null;
+}
+
 function getProjectDetails($info, $project)
 {
     $project_data = $info->getProjectConfig($project);
 
     $status = getProjectStatusInfo($project_data['url']);
 
-    $commit = $status['commit'];
+    $statusInfo = new JsonPath( $status );
+
+    $commit = getResult($statusInfo->getPath( $project_data['commit'] ));
 
     $details = $info->getCommitDetails($commit, $project);
-    $details['version'] = $status['version'];
+
+    $details['version'] = getResult($statusInfo->getPath( $project_data['version'] ));
 
     $details['branches'] = $info->getBranchesForCommit($commit, $project);
 
@@ -73,6 +82,7 @@ $app->get('status/{environment}/{project}', function(Request $request) use ($app
     return $app['twig']->render('status.twig',
         array(
             //'info' => $info,
+            'environment' => $environment,
             'projects' => $config['projects']
         )
     );

@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "92adf580eee0e29c7240405ae6c7e267",
+    "hash": "68079d1bf0a21f8f1e6bc369caaca965",
     "packages": [
         {
             "name": "guzzle/guzzle",
@@ -239,6 +239,38 @@
                 "issues": "https://github.com/leibowitz/php-github-utils/issues"
             },
             "time": "2013-11-04 15:47:37"
+        },
+        {
+            "name": "leibowitz/php-jsonpath",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/leibowitz/php-jsonpath.git",
+                "reference": "2936deaee5b4de54656b9c10a133d8b79b5284a9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/leibowitz/php-jsonpath/zipball/2936deaee5b4de54656b9c10a133d8b79b5284a9",
+                "reference": "2936deaee5b4de54656b9c10a133d8b79b5284a9",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Leibowitz\\Utils\\Json\\": "src/"
+                }
+            },
+            "authors": [
+                {
+                    "name": "Gianni Moschini",
+                    "email": "gianni.moschini+composer@hailocab.com"
+                }
+            ],
+            "support": {
+                "source": "https://github.com/leibowitz/php-jsonpath/tree/master",
+                "issues": "https://github.com/leibowitz/php-jsonpath/issues"
+            },
+            "time": "2013-11-07 02:52:58"
         },
         {
             "name": "pimple/pimple",
@@ -803,7 +835,8 @@
     "minimum-stability": "stable",
     "stability-flags": {
         "knplabs/github-api": 20,
-        "leibowitz/github-utils": 20
+        "leibowitz/github-utils": 20,
+        "leibowitz/php-jsonpath": 20
     },
     "platform": [
 
