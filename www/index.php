@@ -52,6 +52,12 @@ function getProjectDetails($info, $project)
         );
     }
 
+    if( array_key_exists('time', $project_data) ) {
+        $details['time'] = getResult(
+            $statusInfo->getPath( $project_data['time'] )
+        );
+    }
+
     $details['branches'] = $info->getBranchesForCommit($commit, $project);
 
     return $details;
