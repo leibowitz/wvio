@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html dir="ltr" lang="en-US">
     <head>
-        <title>What the Fuck is on Staging</title>
+        <title>What the Fuck is on {{ environment }}</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <link rel="stylesheet" type="text/css" media="screen" href="/css/style.css" />
     </head>
@@ -34,7 +34,7 @@
   {% for key, project in projects %}
     <tr>
     <td>
-    {{ project.name }}
+    {{ key }}
     </td>
     <td>
       <span id="project-{{ key }}-author"></span>
@@ -58,6 +58,7 @@
 
 <script type="text/javascript">
   var projects = {{ projects|json_encode|raw }};
+  var environment = '{{ environment }}';
 </script>
 <script type="text/javascript" src="/js/jquery.js"></script>
 <script type="text/javascript">
@@ -77,7 +78,7 @@ function getResponse(project){
 
 for(project in projects)
 {
-  var url = 'http://wvio.dev/staging/' + projects[project]['name'];
+  var url = 'http://wvio.dev/'+environment+'/' + project;
     $.ajax({
           url: url,
           dataType: 'json',

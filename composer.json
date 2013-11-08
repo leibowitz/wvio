@@ -8,6 +8,10 @@
         {
             "type": "vcs",
             "url": "https://github.com/leibowitz/php-github-api"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/leibowitz/php-jsonpath"
         }
     ],
     "require": {
@@ -17,7 +21,8 @@
         "guzzle/guzzle": "~3.7",
         "twig/twig": ">=1.8,<2.0-dev",
         "knplabs/github-api": "dev-modify_pull_request_params",
-        "leibowitz/github-utils": "dev-master"
+        "leibowitz/github-utils": "dev-master",
+        "leibowitz/php-jsonpath": "dev-master"
     },
     "authors": [
         {
