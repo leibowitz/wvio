@@ -100,9 +100,13 @@ $app->match('{environment}/{project}', function(Request $request) use ($app) {
     //$environment = trim(file_get_contents( __DIR__ . '/../config/environment.txt' ));
     $environment = $request->get('environment');
 
-    // Get config from file
-    $config_file = __DIR__ . '/../config/'.$environment.'/settings.yml';
+    // global settings
+    $config_file = __DIR__ . '/../config/settings.yml';
     $config = Yaml::parse($config_file);
+
+    // Get environment config
+    $config_file = __DIR__ . '/../config/'.$environment.'/settings.yml';
+    $config = array_replace_recursive($config, Yaml::parse($config_file));
 
     $info = new ProjectInfo($config);
 
