@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "68079d1bf0a21f8f1e6bc369caaca965",
+    "hash": "b83d7100b1a6a0c21d3e3e0469f03389",
     "packages": [
         {
             "name": "guzzle/guzzle",
@@ -99,16 +99,16 @@
         },
         {
             "name": "knplabs/github-api",
-            "version": "dev-modify_pull_request_params",
+            "version": "dev-wvio_version",
             "source": {
                 "type": "git",
                 "url": "https://github.com/leibowitz/php-github-api.git",
-                "reference": "1ff5780f160ca4f4f8b0693826aa190988a3e9af"
+                "reference": "c9c682b94a5a83abe150c90f85dbac2cb017eac0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/leibowitz/php-github-api/zipball/1ff5780f160ca4f4f8b0693826aa190988a3e9af",
-                "reference": "1ff5780f160ca4f4f8b0693826aa190988a3e9af",
+                "url": "https://api.github.com/repos/leibowitz/php-github-api/zipball/c9c682b94a5a83abe150c90f85dbac2cb017eac0",
+                "reference": "c9c682b94a5a83abe150c90f85dbac2cb017eac0",
                 "shasum": ""
             },
             "require": {
@@ -153,9 +153,9 @@
                 "github"
             ],
             "support": {
-                "source": "https://github.com/leibowitz/php-github-api/tree/modify_pull_request_params"
+                "source": "https://github.com/leibowitz/php-github-api/tree/wvio_version"
             },
-            "time": "2013-11-03 15:02:59"
+            "time": "2013-11-08 12:47:38"
         },
         {
             "name": "kriswallsmith/buzz",
@@ -211,16 +211,16 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/leibowitz/php-github-utils.git",
-                "reference": "4972d2db37795c0e6c751139003bff965784b7c2"
+                "reference": "fa47d70cb2af609750760ae5619139f29b66ec67"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/leibowitz/php-github-utils/zipball/4972d2db37795c0e6c751139003bff965784b7c2",
-                "reference": "4972d2db37795c0e6c751139003bff965784b7c2",
+                "url": "https://api.github.com/repos/leibowitz/php-github-utils/zipball/fa47d70cb2af609750760ae5619139f29b66ec67",
+                "reference": "fa47d70cb2af609750760ae5619139f29b66ec67",
                 "shasum": ""
             },
             "require": {
-                "knplabs/github-api": "dev-modify_pull_request_params"
+                "knplabs/github-api": "dev-wvio_version"
             },
             "type": "library",
             "autoload": {
@@ -238,7 +238,7 @@
                 "source": "https://github.com/leibowitz/php-github-utils/tree/master",
                 "issues": "https://github.com/leibowitz/php-github-utils/issues"
             },
-            "time": "2013-11-04 15:47:37"
+            "time": "2013-11-08 13:31:20"
         },
         {
             "name": "leibowitz/php-jsonpath",
