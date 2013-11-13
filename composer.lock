@@ -211,12 +211,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/leibowitz/php-github-utils.git",
-                "reference": "fa47d70cb2af609750760ae5619139f29b66ec67"
+                "reference": "22e531882a3231b1eac98cb54155f1ddb8e9e02b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/leibowitz/php-github-utils/zipball/fa47d70cb2af609750760ae5619139f29b66ec67",
-                "reference": "fa47d70cb2af609750760ae5619139f29b66ec67",
+                "url": "https://api.github.com/repos/leibowitz/php-github-utils/zipball/22e531882a3231b1eac98cb54155f1ddb8e9e02b",
+                "reference": "22e531882a3231b1eac98cb54155f1ddb8e9e02b",
                 "shasum": ""
             },
             "require": {
@@ -238,7 +238,7 @@
                 "source": "https://github.com/leibowitz/php-github-utils/tree/master",
                 "issues": "https://github.com/leibowitz/php-github-utils/issues"
             },
-            "time": "2013-11-08 13:31:20"
+            "time": "2013-11-13 11:58:58"
         },
         {
             "name": "leibowitz/php-jsonpath",
